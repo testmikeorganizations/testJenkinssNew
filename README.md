@@ -25,4 +25,5 @@ Navigate to the IP of the Docker VM and port 8080 to access Jenkins. The pipelin
 
 ## References
 
-README: https://github.com/jenkinsci/docker/blob/master/README.md
+* Docker Machine Installation Instructions: https://docs.docker.com/machine/install-machine/
+* Jenkins Docker Image README:  https://github.com/jenkinsci/docker/blob/master/README.md
