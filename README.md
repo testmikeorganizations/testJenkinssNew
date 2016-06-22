@@ -1,5 +1,10 @@
 #Jenkins 2.0 Pipeline Demo
 
+Simply clone this project:
+```
+git clone https://github.com/dave-malone/jenkins2-pipeline-demo
+cd jenkins2-pipeline-demo
+```
 
 Assumes a running Docker Machine at IP 192.168.99.100, and that you have run through the initial Jenkins 2.0 setup.
 
