@@ -17,6 +17,6 @@ node {
 
 stage 'test'
 node {
-    sh './gradlew clean test'
+    sh './gradlew clean unitTest'
     step([$class: 'JUnitResultArchiver', testResults: '**/build/test-results/TEST-*.xml'])
 }
