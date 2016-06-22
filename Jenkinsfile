@@ -23,7 +23,7 @@ node {
 stage 'deploy'
 node {
   echo "Deploying to CF"
-  sh 'wget http://bit.ly/1GIceDZ -O cf.tgz && tar -xvzf cf.tgz'
-  sh 'cf login -a https://api.run.pez.pivotal.io -u dmalone+jenkins@pivotal.io -p jenkins -o dmalone -s development'
+  sh 'wget https://cli.run.pivotal.io/stable?release=linux64-binary&version=6.19.0&source=github-rel -O cf.tgz && tar -xvzf cf.tgz'
+  sh 'cf login -a https://api.run.pez.pivotal.io -u dmalone+jenkins@pivotal.io -p jenkins -o pivot-dmalone -s development'
   sh 'cf push -n personal-financier -p build/libs/*.jar'
 }
