@@ -19,3 +19,8 @@ node {
     echo "Archiving Jar file"
     archive 'build/libs/*.jar'
 }
+
+stage 'deploy'
+node {
+  echo "Deploying to CF"
+}
