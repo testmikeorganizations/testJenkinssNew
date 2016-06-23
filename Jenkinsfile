@@ -14,7 +14,7 @@ node {
 stage 'test'
 node {
     sh './gradlew clean test assemble'
-    step([$class: 'JUnitResultArchiver', testResults: '**/build/test-results/TEST-*.xml'])
+    #step([$class: 'JUnitResultArchiver', testResults: '**/build/test-results/TEST-*.xml'])
 }
 
 stage 'deploy'
