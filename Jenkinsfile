@@ -25,5 +25,5 @@ node {
   echo "CF CLI Version: "
   sh "cf --version"
   sh "CF_HOME=./ cf login -a https://api.run.pez.pivotal.io -u dmalone+jenkins@pivotal.io -p jenkins -o pivot-dmalone -s development"
-  sh "CF_HOME=./ cf push personal-financier -p build/libs/*.jar -b java_buildpack"
+  sh "CF_HOME=./ cf push personal-financier -o dmalone/personalfinancier"
 }
