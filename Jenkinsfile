@@ -22,6 +22,9 @@ node {
 
 stage 'deploy'
 node {
+  echo "WORKSPACE = $WORKSPACE"
+  echo "CF CLI Version: "
+  sh "cf --version"
   sh "CF_HOME=$WORKSPACE cf login -a https://api.run.pez.pivotal.io -u dmalone+jenkins@pivotal.io -p jenkins -o pivot-dmalone -s development"
   sh "CF_HOME=$WORKSPACE cf push -n personal-financier -p build/libs/*.jar"
 }
