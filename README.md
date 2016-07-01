@@ -32,9 +32,10 @@ export JENKINS_URL=http://192.168.99.100:8080/
 java -jar jenkins-cli.jar create-job DemoPipeline < config.xml --username admin --password admin
 ```
 
-Navigate to the IP of the Docker VM and port 8080 to access Jenkins. The pipeline created using the above script should be located at http://192.168.99.100:8080/DemoPipeline
+Navigate to the IP of the Docker VM and port 8080 to access Jenkins. The pipeline created using the above script should be located at http://192.168.99.100:8080/job/DemoPipeline
 
-If you've already run this named container once before, then it's simple to start the container by name: `docker start jenkins-pipeline-demo`
+This is a starter job. Run this job to create the actual pipeline which will be available at http://dockerip/job/Jenkins%20CD%20Pipeline/
+
 
 ## To Build this project
 
