@@ -23,4 +23,5 @@ RUN install-plugins.sh \
   gradle \
   github-organization-folder \
   email-ext \
-  credentials-binding
+  credentials-binding \
+  job-dsl
