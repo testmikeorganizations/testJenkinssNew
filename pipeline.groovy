@@ -20,15 +20,15 @@ node {
 stage 'deploy'
 node {
   sh "ls -la"
-  sh "./gradlew cf-push -Pcf.ccHost=api.run.pez.pivotal.io -Pcf.ccUser=bkunjummen+jenkins@pivotal.io -Pcf.ccPassword=jenkins -Pcf.org=pivot-bkunjummen -Pcf.space=development -Pcf.domain=cfapps.pez.pivotal.io"
+  sh "./gradlew cf-push -Pcf.ccHost=api.run.pez.pivotal.io -Pcf.ccUser=bkunjummen+jenkins@pivotal.io -Pcf.ccPassword=jenkins -Pcf.org=pivot-bkunjummen -Pcf.space=development -Pcf.domain=cfapps.pez.pivotal.io -Pcf.hostName=sample-spring-cloud-svc-ci-dev"
 }
 
 node {
   input 'Deploy to Test?'
-  sh "./gradlew cf-push -Pcf.ccHost=api.run.pez.pivotal.io -Pcf.ccUser=bkunjummen+jenkins@pivotal.io -Pcf.ccPassword=jenkins -Pcf.org=pivot-bkunjummen -Pcf.space=test -Pcf.domain=cfapps.pez.pivotal.io"
+  sh "./gradlew cf-push -Pcf.ccHost=api.run.pez.pivotal.io -Pcf.ccUser=bkunjummen+jenkins@pivotal.io -Pcf.ccPassword=jenkins -Pcf.org=pivot-bkunjummen -Pcf.space=test -Pcf.domain=cfapps.pez.pivotal.io -Pcf.hostName=sample-spring-cloud-svc-ci-test"
 }
 
 node {
   input 'Deploy to Prod?'
-  sh "./gradlew cf-push -Pcf.ccHost=api.run.pez.pivotal.io -Pcf.ccUser=bkunjummen+jenkins@pivotal.io -Pcf.ccPassword=jenkins -Pcf.org=pivot-bkunjummen -Pcf.space=prod -Pcf.domain=cfapps.pez.pivotal.io"
+  sh "./gradlew cf-push -Pcf.ccHost=api.run.pez.pivotal.io -Pcf.ccUser=bkunjummen+jenkins@pivotal.io -Pcf.ccPassword=jenkins -Pcf.org=pivot-bkunjummen -Pcf.space=prod -Pcf.domain=cfapps.pez.pivotal.io -Pcf.hostName=sample-spring-cloud-svc-ci-prod"
 }
