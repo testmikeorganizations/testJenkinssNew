@@ -6,7 +6,7 @@ Demonstrates a Jenkins 2.0 Pipeline to build a Java project and deploy the proje
 
 Simply clone this project:
 ```
-git clone https://github.com/dave-malone/jenkins2-pipeline-demo
+git clone https://github.com/pivotalservices/jenkins2-pipeline-demo
 cd jenkins2-pipeline-demo
 ```
 
