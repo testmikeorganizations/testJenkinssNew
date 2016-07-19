@@ -21,7 +21,7 @@ docker pull dmalone/jenkins2-cf-pipeline-demo or docker build -t dmalone/jenkins
 docker run -i -t -p 8080:8080 -p 50000:50000 --name=jenkins-pipeline-demo -v /var/jenkins_home dmalone/jenkins2-cf-pipeline-demo
 ```
 
-The default admin password will appear in the console as logs from Jenkins. This password is required to run through the initial setup of Jenkins. You can also obtain the Jenkins Admin password by executing the following: `docker exec -it ``docker ps -l -q`` cat /var/jenkins_home/secrets/initialAdminPassword` where ``docker ps -l -q`` will retrieve the last container ID.
+The default admin password will appear in the console as logs from Jenkins. This password is required to run through the initial setup of Jenkins. You can also obtain the Jenkins Admin password by executing the following: `docker exec -it $(docker ps -l -q) cat /var/jenkins_home/secrets/initialAdminPassword` where ``docker ps -l -q`` will retrieve the last container ID.
 
 After this is complete, then you can create the Demo Pipeline Job using the CLI:
 
