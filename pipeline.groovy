@@ -17,6 +17,11 @@ node {
     // step([$class: 'JUnitResultArchiver', testResults: '**/build/test-results/TEST-*.xml'])
 }
 
+// stage 'bump-version'
+// node {
+//   sh './gradlew -q bumpPatch release printVersion'
+// }
+
 stage 'deploy'
 node {
   sh "ls -la"
