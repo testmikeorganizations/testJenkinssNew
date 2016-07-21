@@ -16,6 +16,11 @@
           <description>PCF password</description>
           <defaultValue>jenkins</defaultValue>
         </hudson.model.PasswordParameterDefinition>
+        <hudson.model.StringParameterDefinition>
+          <name>cf_username</name>
+          <description>Sonar URL</description>
+          <defaultValue>http://192.168.99.100:9000</defaultValue>
+        </hudson.model.StringParameterDefinition>
       </parameterDefinitions>
     </hudson.model.ParametersDefinitionProperty>
   </properties>
