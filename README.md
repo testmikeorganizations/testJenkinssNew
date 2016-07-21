@@ -12,7 +12,6 @@ Demonstrates a Jenkins 2.0 Pipeline to build a Java project and deploy the proje
 
 * Run the following commands to run the Docker container
   ```
-  ## Your container will mount the jenkins home volume using this directory
   docker-machine create jenkins2-pipeline-demo --driver virtualbox --virtualbox-memory "11000" --virtualbox-disk-size "100000"
   eval "$(docker-machine env jenkins2-pipeline-demo)"
   docker pull dmalone/jenkins2-cf-pipeline-demo or docker build -t dmalone/jenkins2-cf-pipeline-demo - < Dockerfile
