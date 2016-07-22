@@ -1,0 +1,15 @@
+sonar:
+  image: sonarqube:latest
+  ports:
+   - "9000:9000"
+nexus:
+  image: sonatype/nexus:oss
+  ports:
+   - "8081:8081"
+jenkins:
+  image: dmalone/jenkins2-cf-pipeline-demo
+  ports:
+   - "8080:8080"
+  links:
+  #  - sonarqube
+   - nexus

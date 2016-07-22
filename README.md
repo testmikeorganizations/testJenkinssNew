@@ -44,6 +44,25 @@ Demonstrates a Jenkins 2.0 Pipeline to build a Java project and deploy the proje
   ```
 The pipeline created using the above script should be located at `$JENKINS_URL/job/sample-spring-cloud-svc-ci`
 
+## Docker Compose
+
+To run this demo with Sonar and Nexus you can startup all the containers as once using Docker Compose
+
+  `docker-compose up -d`
+
+If everything is configured correctly, each of the container images we built earlier will be launched within their own VM container on Docker and networked for automatic service discovery. You will see a flurry of log output from each of the services as they begin their startup sequence. This might take a few minutes to complete, depending on the performance of the machine you’re running this demo on.
+
+To see the log output from the cluster, you can run the following command.
+
+  `docker-compose logs`
+
+Once the startup sequence is completed, you can navigate to Jenkins using the `$JENKINS_URL` or copy and paste the following command into the terminal where Docker can be accessed using the $DOCKER_HOST environment variable.
+```
+$ open $(echo \"$(echo $DOCKER_HOST)\"|
+            \sed 's/tcp:\/\//http:\/\//g'|
+            \sed 's/[0-9]\{4,\}/8080/g'|
+            \sed 's/\"//g')
+```
 
 ## To Build this project
 
