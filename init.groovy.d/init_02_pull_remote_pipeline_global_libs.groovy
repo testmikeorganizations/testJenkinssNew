@@ -19,7 +19,7 @@ Repository localRepo = new FileRepositoryBuilder().setGitDir(workflowLibGitDir).
 logger.info("Having repository: " + localRepo.getDirectory());
 Git git = new Git(localRepo);
 StoredConfig config = git.getRepository().getConfig();
-config.setString("remote", "upstream", "url", "https://github.com/beedemo-sa/workflowLibs");
+config.setString("remote", "upstream", "url", "https://github.com/beedemo/workflowLibs");
 config.save();
 
 println "git remote -v".execute(null, workflowLibDir).text

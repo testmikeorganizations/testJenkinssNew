@@ -1,4 +1,3 @@
-audit-trail:2.2
 copyartifact:1.38
 support-core:2.32
 structs:1.1
