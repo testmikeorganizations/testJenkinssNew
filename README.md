@@ -14,8 +14,8 @@ Demonstrates a Jenkins 2.0 Pipeline to build a Java project and deploy the proje
   ```
   docker-machine create jenkins2-pipeline-demo --driver virtualbox --virtualbox-memory "11000" --virtualbox-disk-size "100000"
   eval "$(docker-machine env jenkins2-pipeline-demo)"
-  docker build -t pivotal/jenkins2-cf-pipeline-demo - < Dockerfile
-  docker run -i -t -p 8080:8080 -p 50000:50000 --name=jenkins-pipeline-demo -v /var/jenkins_home pivotal/jenkins2-cf-pipeline-demo
+  docker build -t dmalone/jenkins2-cf-pipeline-demo - < Dockerfile
+  docker run -i -t -p 8080:8080 -p 50000:50000 --name=jenkins-pipeline-demo -v /var/jenkins_home dmalone/jenkins2-cf-pipeline-demo
   ```
 
 * The default admin password will appear in the console as logs from Jenkins. This password is required to run through the initial setup of Jenkins. You can also retrieve the Jenkins Admin password by executing the following: `docker exec -it $(docker ps -l -q) cat /var/jenkins_home/secrets/initialAdminPassword` where ``docker ps -l -q`` will retrieve the last container ID.
@@ -68,11 +68,11 @@ $ open $(echo \"$(echo $DOCKER_HOST)\"|
 
 This project builds a custom Docker container with Jenkins plugins automatically installed, and the CF CLI automatically installed and configured so it can be used by Pipelines.
 
-  `docker build -t pivotal/jenkins2-cf-pipeline-demo .`
+  `docker build -t dmalone/jenkins2-cf-pipeline-demo .`
 
 ## To Build Cloudbees version of this project
 
-  `docker build -f Dockerfile_cloudbees -t pivotal/cb-cf-pipeline-demo .`
+  `docker build -f Dockerfile_cloudbees -t dmalone/cb-cf-pipeline-demo .`
 
 ### Initilization scripts (Groovy init scripts that run on Jenkins startup)
 - `init_02_pull_remote_pipeline_global_libs.groovy`: Pulls Pipeline Global Library from a GitHub repo into the Jenkins Pipeline repo, making the shared Pipeline Libraries available immediately after initial Jenkins startup
