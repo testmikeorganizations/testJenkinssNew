@@ -21,12 +21,12 @@
           <description>Sonar URL</description>
           <defaultValue>http://192.168.99.100:9000</defaultValue>
         </hudson.model.StringParameterDefinition>
+        <hudson.model.StringParameterDefinition>
+          <name>nexus_url</name>
+          <description>Nexus URL</description>
+          <defaultValue>http://192.168.99.100:8081</defaultValue>
+        </hudson.model.StringParameterDefinition>
       </parameterDefinitions>
-      <hudson.model.StringParameterDefinition>
-        <name>nexus_url</name>
-        <description>Nexus URL</description>
-        <defaultValue>http://192.168.99.100:8081</defaultValue>
-      </hudson.model.StringParameterDefinition>
     </hudson.model.ParametersDefinitionProperty>
   </properties>
   <definition class="org.jenkinsci.plugins.workflow.cps.CpsScmFlowDefinition" plugin="workflow-cps@2.6">
