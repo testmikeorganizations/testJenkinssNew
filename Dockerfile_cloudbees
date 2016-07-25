@@ -1,4 +1,4 @@
-FROM cloudbees/pse-master:1.1.0
+FROM jenkinsci/jenkins:2.7
 
 USER root
 
@@ -8,18 +8,22 @@ ENV PATH $CF_CLI:$PATH
 ADD https://cli.run.pivotal.io/stable?release=linux32-binary&version=6.19.0&source=github-rel $CF_CLI/cf.tgz
 RUN tar zxvf $CF_CLI/cf.tgz && cf --version
 
-# override CJE war to use newer version
-RUN rm /usr/share/jenkins/jenkins.war
-RUN curl -fsSL http://jenkins-updates.cloudbees.com/download/je/1.651.3.1/jenkins.war -o /usr/share/jenkins/jenkins.war \
-  && echo "515508cd6311cd343f304c6567bc7f6e03c06a0e /usr/share/jenkins/jenkins.war" | sha1sum -c -
+WORKDIR /tmp/files
+RUN chown -R jenkins.jenkins .
 
-# setup base set of Pipeline Global Libs via init groovy script
-COPY ./init.groovy.d/* /usr/share/jenkins/home/init.groovy.d/
-
-# copy list of non-standard plugins to install
-COPY plugins.txt /usr/share/jenkins/plugins.txt
-RUN /usr/local/bin/plugins.sh /usr/share/jenkins/plugins.txt
-COPY ./plugins/* /usr/share/jenkins/ref/plugins/
-
-# change back to jenkins user for RUN/ENTRYPOINT commands
 USER jenkins
+
+COPY plugins.txt .
+RUN mkdir -p /usr/share/jenkins/ref && /usr/local/bin/plugins.sh plugins.txt
+
+ADD JENKINS_HOME /usr/share/jenkins/ref
+
+USER root
+RUN chown -R jenkins.jenkins /usr/share/jenkins/ref
+COPY run.sh /usr/local/bin/
+RUN chmod a+x /usr/local/bin/run.sh
+
+USER jenkins
+CMD /usr/local/bin/run.sh
+
+EXPOSE 8080

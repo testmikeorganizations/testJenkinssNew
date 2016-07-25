@@ -15,7 +15,7 @@ Demonstrates a Jenkins 2.0 Pipeline to build a Java project and deploy the proje
   docker-machine create jenkins2-pipeline-demo --driver virtualbox --virtualbox-memory "11000" --virtualbox-disk-size "100000"
   eval "$(docker-machine env jenkins2-pipeline-demo)"
   docker build -t dmalone/jenkins2-cf-pipeline-demo .
-  docker run -i -t -p 8080:8080 -p 50000:50000 --name=jenkins-pipeline-demo -v /var/jenkins_home dmalone/jenkins2-cf-pipeline-demo
+  docker run -i -t -d -p 8080:8080 -p 50000:50000 --name=jenkins-pipeline-demo -v /var/jenkins_home dmalone/jenkins2-cf-pipeline-demo
   ```
 
 * The default admin password will appear in the console as logs from Jenkins. This password is required to run through the initial setup of Jenkins. You can also retrieve the Jenkins Admin password by executing the following: `docker exec -it $(docker ps -l -q) cat /var/jenkins_home/secrets/initialAdminPassword` where ``docker ps -l -q`` will retrieve the last container ID.
@@ -74,14 +74,9 @@ This project builds a custom Docker container with Jenkins plugins automatically
 
   `docker build -f Dockerfile_cloudbees -t malston/cb-cf-pipeline-demo .`
 
-### Initilization scripts (Groovy init scripts that run on Jenkins startup)
-- `init_02_pull_remote_pipeline_global_libs.groovy`: Pulls Pipeline Global Library from a GitHub repo into the Jenkins Pipeline repo, making the shared Pipeline Libraries available immediately after initial Jenkins startup
-- `init_03_add_sa_credentials.groovy`: Sets up global credentials, retrieving sensitive data from environmental variables; includes credential to connect to GitHub Enterprise
-- `init_04_add_ghe_server.groovy`: Configures GitHub Enterprise API endpoint to be used with the GitHub Organization Folder plugin
-- `init_05_mail_server_config.groovy`: Configures mail server to allow sending email from Jenkins
-- `init_20_top-level-folders.groovy`: Creates a folder used to hold demo job(s)
-- `init_99_save.groovy`: Ensures any previous configuration changes are saved  
+## Run Cloudbees Jenkins
 
+  `docker run -i -t -d -p 8080:8080 -p 2222:2222 --name=cb-pipeline-demo malston/cb-cf-pipeline-demo`
 
 ## References
 

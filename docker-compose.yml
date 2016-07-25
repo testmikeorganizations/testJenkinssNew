@@ -16,3 +16,10 @@ jenkins:
     - /var/jenkins_home
   links:
    - nexus
+# gerrit:
+#   container_name: gerrit
+#   hostname: gerrit
+#   build: ./gerrit
+#   ports:
+#     - "8080:8080"
+#     - "29418:29418"
