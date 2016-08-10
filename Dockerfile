@@ -6,7 +6,7 @@ USER root
 ENV CF_CLI $PWD/
 ENV PATH $CF_CLI:$PATH
 
-ADD https://cli.run.pivotal.io/stable?release=linux32-binary&version=6.19.0&source=github-rel \
+ADD https://cli.run.pivotal.io/stable?release=linux32-binary&version=6.21.0&source=github-rel \
   $CF_CLI/cf.tgz
 
 RUN tar zxvf $CF_CLI/cf.tgz
@@ -21,7 +21,9 @@ RUN install-plugins.sh \
   timestamper \
   subversion \
   gradle \
+  maven \
   github-organization-folder \
   email-ext \
-  credentials-binding \
-  job-dsl
+  credentials-binding:1.23 \
+  job-dsl \
+  config-file-provider:2.11
