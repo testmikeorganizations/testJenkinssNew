@@ -8,12 +8,13 @@ nexus:
   ports:
    - "8081:8081"
 jenkins:
-  image: dmalone/jenkins2-cf-pipeline-demo
+  image: malston/jenkins2-cf-pipeline-demo
   ports:
    - "8080:8080"
    - "50000:50000"
+  # volumes: ["./JENKINS_HOME:/var/jenkins_home"]
   volumes:
-    - /var/jenkins_home
+  - /var/jenkins_home
   links:
    - nexus
 # gerrit:
