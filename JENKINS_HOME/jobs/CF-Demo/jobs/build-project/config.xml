@@ -1,28 +1,31 @@
 <?xml version='1.0' encoding='UTF-8'?>
-<maven2-moduleset plugin="maven-plugin@2.9">
+<maven2-moduleset plugin="maven-plugin@2.13">
   <actions/>
   <description></description>
-  <logRotator class="hudson.tasks.LogRotator">
-    <daysToKeep>10</daysToKeep>
-    <numToKeep>5</numToKeep>
-    <artifactDaysToKeep>-1</artifactDaysToKeep>
-    <artifactNumToKeep>-1</artifactNumToKeep>
-  </logRotator>
   <keepDependencies>false</keepDependencies>
   <properties>
-    <com.coravy.hudson.plugins.github.GithubProjectProperty plugin="github@1.11.1">
-      <projectUrl>https://github.com/spring-cloud-samples/fortune-teller</projectUrl>
+    <jenkins.model.BuildDiscarderProperty>
+      <strategy class="hudson.tasks.LogRotator">
+        <daysToKeep>10</daysToKeep>
+        <numToKeep>5</numToKeep>
+        <artifactDaysToKeep>-1</artifactDaysToKeep>
+        <artifactNumToKeep>-1</artifactNumToKeep>
+      </strategy>
+    </jenkins.model.BuildDiscarderProperty>
+    <com.coravy.hudson.plugins.github.GithubProjectProperty plugin="github@1.20.0">
+      <projectUrl>https://github.com/pivotalservices/sample-spring-cloud-svc-ci/</projectUrl>
+      <displayName></displayName>
     </com.coravy.hudson.plugins.github.GithubProjectProperty>
-    <se.diabol.jenkins.pipeline.PipelineProperty plugin="delivery-pipeline-plugin@0.8.11">
+    <se.diabol.jenkins.pipeline.PipelineProperty plugin="delivery-pipeline-plugin@0.9.12">
       <taskName>Release</taskName>
       <stageName>Build</stageName>
     </se.diabol.jenkins.pipeline.PipelineProperty>
   </properties>
-  <scm class="hudson.plugins.git.GitSCM" plugin="git@2.3.5">
+  <scm class="hudson.plugins.git.GitSCM" plugin="git@2.5.3">
     <configVersion>2</configVersion>
     <userRemoteConfigs>
       <hudson.plugins.git.UserRemoteConfig>
-        <url>https://github.com/spring-cloud-samples/fortune-teller.git</url>
+        <url>https://github.com/pivotalservices/sample-spring-cloud-svc-ci.git</url>
       </hudson.plugins.git.UserRemoteConfig>
     </userRemoteConfigs>
     <branches>
@@ -39,7 +42,7 @@
   <blockBuildWhenDownstreamBuilding>false</blockBuildWhenDownstreamBuilding>
   <blockBuildWhenUpstreamBuilding>false</blockBuildWhenUpstreamBuilding>
   <triggers>
-    <com.cloudbees.jenkins.GitHubPushTrigger plugin="github@1.11.1">
+    <com.cloudbees.jenkins.GitHubPushTrigger plugin="github@1.20.0">
       <spec></spec>
     </com.cloudbees.jenkins.GitHubPushTrigger>
   </triggers>
@@ -49,10 +52,11 @@
     <artifactId>fortune-teller</artifactId>
   </rootModule>
   <goals>clean install</goals>
-  <mavenName>Maven</mavenName>
   <aggregatorStyleBuild>true</aggregatorStyleBuild>
   <incrementalBuild>false</incrementalBuild>
+  <localRepository class="hudson.maven.local_repo.DefaultLocalRepositoryLocator"/>
   <ignoreUpstremChanges>true</ignoreUpstremChanges>
+  <ignoreUnsuccessfulUpstreams>false</ignoreUnsuccessfulUpstreams>
   <archivingDisabled>false</archivingDisabled>
   <siteArchivingDisabled>false</siteArchivingDisabled>
   <fingerprintingDisabled>false</fingerprintingDisabled>
@@ -66,34 +70,16 @@
   <globalSettings class="jenkins.mvn.DefaultGlobalSettingsProvider"/>
   <reporters/>
   <publishers>
-    <hudson.tasks.test.AggregatedTestResultPublisher plugin="junit@1.5">
+    <hudson.tasks.test.AggregatedTestResultPublisher plugin="junit@1.18">
       <includeFailedBuilds>false</includeFailedBuilds>
     </hudson.tasks.test.AggregatedTestResultPublisher>
     <hudson.maven.RedeployPublisher>
       <id>releases</id>
-      <url>http://192.168.99.102:8081/nexus/content/repositories/releases</url>
+      <url>http://192.168.99.102:8081/content/repositories/releases</url>
       <uniqueVersion>false</uniqueVersion>
       <evenIfUnstable>false</evenIfUnstable>
     </hudson.maven.RedeployPublisher>
-    <hudson.plugins.performance.PerformancePublisher plugin="performance@1.13">
-      <errorFailedThreshold>0</errorFailedThreshold>
-      <errorUnstableThreshold>0</errorUnstableThreshold>
-      <errorUnstableResponseTimeThreshold></errorUnstableResponseTimeThreshold>
-      <relativeFailedThresholdPositive>0.0</relativeFailedThresholdPositive>
-      <relativeFailedThresholdNegative>0.0</relativeFailedThresholdNegative>
-      <relativeUnstableThresholdPositive>0.0</relativeUnstableThresholdPositive>
-      <relativeUnstableThresholdNegative>0.0</relativeUnstableThresholdNegative>
-      <nthBuildNumber>0</nthBuildNumber>
-      <modeRelativeThresholds>false</modeRelativeThresholds>
-      <configType>ART</configType>
-      <modeOfThreshold>false</modeOfThreshold>
-      <compareBuildPrevious>false</compareBuildPrevious>
-      <xml></xml>
-      <modePerformancePerTestCase>true</modePerformancePerTestCase>
-      <parsers/>
-      <modeThroughput>true</modeThroughput>
-    </hudson.plugins.performance.PerformancePublisher>
-    <hudson.plugins.parameterizedtrigger.BuildTrigger plugin="parameterized-trigger@2.26">
+    <hudson.plugins.parameterizedtrigger.BuildTrigger plugin="parameterized-trigger@2.32">
       <configs>
         <hudson.plugins.parameterizedtrigger.BuildTriggerConfig>
           <configs>
@@ -109,31 +95,41 @@
     </hudson.plugins.parameterizedtrigger.BuildTrigger>
   </publishers>
   <buildWrappers>
-    <se.diabol.jenkins.pipeline.PipelineVersionContributor plugin="delivery-pipeline-plugin@0.8.11">
+    <se.diabol.jenkins.pipeline.PipelineVersionContributor plugin="delivery-pipeline-plugin@0.9.12">
       <versionTemplate>1.${BUILDS_ALL_TIME}.r${GIT_COMMIT}</versionTemplate>
       <updateDisplayName>true</updateDisplayName>
     </se.diabol.jenkins.pipeline.PipelineVersionContributor>
-    <org.jvnet.hudson.tools.versionnumber.VersionNumberBuilder plugin="versionnumber@1.5">
+    <org.jvnet.hudson.tools.versionnumber.VersionNumberBuilder plugin="versionnumber@1.7">
       <versionNumberString>1.${BUILDS_ALL_TIME}.r${GIT_COMMIT}</versionNumberString>
-      <projectStartDate>2015-05-27 05:00:00.0 UTC</projectStartDate>
+      <projectStartDate>2016-08-10 00:00:00.0 UTC</projectStartDate>
       <environmentVariableName>BUILD_VERSION</environmentVariableName>
       <environmentPrefixVariable></environmentPrefixVariable>
-      <oBuildsToday>-1</oBuildsToday>
-      <oBuildsThisMonth>-1</oBuildsThisMonth>
-      <oBuildsThisYear>-1</oBuildsThisYear>
-      <oBuildsAllTime>-1</oBuildsAllTime>
+      <oBuildsToday></oBuildsToday>
+      <oBuildsThisWeek></oBuildsThisWeek>
+      <oBuildsThisMonth></oBuildsThisMonth>
+      <oBuildsThisYear></oBuildsThisYear>
+      <oBuildsAllTime></oBuildsAllTime>
       <skipFailedBuilds>false</skipFailedBuilds>
       <useAsBuildDisplayName>true</useAsBuildDisplayName>
     </org.jvnet.hudson.tools.versionnumber.VersionNumberBuilder>
   </buildWrappers>
   <prebuilders>
-    <com.cloudbees.jenkins.GitHubSetCommitStatusBuilder plugin="github@1.11.1"/>
+    <com.cloudbees.jenkins.GitHubSetCommitStatusBuilder plugin="github@1.20.0">
+      <statusMessage>
+        <content></content>
+      </statusMessage>
+    </com.cloudbees.jenkins.GitHubSetCommitStatusBuilder>
     <hudson.tasks.Maven>
       <targets>versions:set -DnewVersion=${BUILD_VERSION}</targets>
-      <mavenName>Maven</mavenName>
+      <mavenName>maven-3.3.9</mavenName>
       <usePrivateRepository>false</usePrivateRepository>
-      <settings class="jenkins.mvn.DefaultSettingsProvider"/>
-      <globalSettings class="jenkins.mvn.DefaultGlobalSettingsProvider"/>
+      <settings class="org.jenkinsci.plugins.configfiles.maven.job.MvnSettingsProvider" plugin="config-file-provider@2.11">
+        <settingsConfigId>c3bddf56-598c-483a-97d7-8852867252e7</settingsConfigId>
+      </settings>
+      <globalSettings class="org.jenkinsci.plugins.configfiles.maven.job.MvnGlobalSettingsProvider" plugin="config-file-provider@2.11">
+        <settingsConfigId>1325bf18-4949-4a8c-93e2-1aa855734244</settingsConfigId>
+      </globalSettings>
+      <injectBuildVariables>true</injectBuildVariables>
     </hudson.tasks.Maven>
   </prebuilders>
   <postbuilders/>
