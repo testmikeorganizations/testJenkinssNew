@@ -128,13 +128,13 @@ fi
   <buildWrappers>
     <com.michelin.cio.hudson.plugins.maskpasswords.MaskPasswordsBuildWrapper>
       <varPasswordPairs>
-        <varPasswordPair var="CF_USER" password="rs3Ytn3TMs2hClcU1G/7JuWl5Ok5tYsOv+ceZ5Mr3H/EWAB5xbz+/CnEgVIDH2dmFgItVEUhGkWejOGc036pKQ=="/>
-        <varPasswordPair var="CF_PASSWORD" password="d9CYUOfaJZsdm4x+n8O1WQHu5841LALPy36JYPO61tyCP2g9EkJAqcsQvPGBiS2SFgItVEUhGkWejOGc036pKQ=="/>
-        <varPasswordPair var="CF_ORG" password="GqHponWH6NkI73HvJ0UyYO5oYm1Sz7DeVVU7jC8Okc5xkAHb6KuYsMqV1vsuuQCDFgItVEUhGkWejOGc036pKQ=="/>
-        <varPasswordPair var="CF_SPACE" password="u5RK0YE6pCZETqpOHugdWEc0Md/8DZgppDurFpvGsGcVumeo0U37+/ceb3XTwkG+FgItVEUhGkWejOGc036pKQ=="/>
-        <varPasswordPair var="CF_API_URL" password="VOJaSqCVukCk0A0xJB8BtcxrEaFr3f9klLZFtGlcFh0wAHJIVWtLpQJpr6nyenu4L9muB+YKchJ7T3iAPZqzu7vj6X8xKeR5jDPW1QZNyK0="/>
-        <varPasswordPair var="CF_APPS_DOMAIN" password="BbT7EU5XcnArbEvL2WQmGFJ5RPpMct5sTdHXDaPT9NLcUjvE/7gHydSU77JpgzDLFgItVEUhGkWejOGc036pKQ=="/>
-        <varPasswordPair var="ENVIRONMENT" password="kh5NFPRcNyNLbAFnAIv7uN9S3BQf7nb4wsD9emRAjudFwOPgiasOo5astXort/qPFgItVEUhGkWejOGc036pKQ=="/>
+        <varPasswordPair var="CF_USER" password="hWBBtXnf1d7u2zMiyQe4b+VS0q4cSRSVyFCD6FqXs8E="/>
+        <varPasswordPair var="CF_PASSWORD" password="F3vG8pd2kJBMdj1KAiGvu5FM+inziY1Dqao06A8eKIY="/>
+        <varPasswordPair var="CF_ORG" password="fj26A8+VElUglk9EQ32zTyyzHvURMQt4FoijNwhGw94="/>
+        <varPasswordPair var="CF_SPACE" password="Wjei8L9Ik6N7FT0lQuxgk63hr0wq2M1He3vmGt7+VFE="/>
+        <varPasswordPair var="CF_API_URL" password="2g7THkHUMwW94lQY1eVC66ZbxVuPTeAtKSZlGz+0mcFV0iroNQFHHFkZvDZhKNrn"/>
+        <varPasswordPair var="CF_APPS_DOMAIN" password="QU4kcDzpAL1j8xXLbjnQMqkccSaupCtdICy+GDDfnxrbJ6VACt9cr92YU0XefQj2"/>
+        <varPasswordPair var="ENVIRONMENT" password="99r6Wx/xRutfCg4Hoi9NuE0xljDM1gRwPA2vIZTQBC8="/>
       </varPasswordPairs>
     </com.michelin.cio.hudson.plugins.maskpasswords.MaskPasswordsBuildWrapper>
     <org.jvnet.hudson.tools.versionnumber.VersionNumberBuilder plugin="versionnumber@1.7">
