@@ -17,9 +17,35 @@
       <displayName></displayName>
     </com.coravy.hudson.plugins.github.GithubProjectProperty>
     <se.diabol.jenkins.pipeline.PipelineProperty plugin="delivery-pipeline-plugin@0.9.12">
-      <taskName>Build</taskName>
-      <stageName>Build</stageName>
+      <taskName>Package</taskName>
+      <stageName>Commit</stageName>
     </se.diabol.jenkins.pipeline.PipelineProperty>
+    <hudson.model.ParametersDefinitionProperty>
+      <parameterDefinitions>
+        <jp.ikedam.jenkins.plugins.extensible__choice__parameter.ExtensibleChoiceParameterDefinition plugin="extensible-choice-parameter@1.3.2">
+          <name>BUILD_VERSION</name>
+          <description>The project build to promote</description>
+          <editable>false</editable>
+          <choiceListProvider class="jp.ikedam.jenkins.plugins.extensible_choice_parameter.SystemGroovyChoiceListProvider">
+            <scriptText>import jenkins.model.*
+import hudson.model.*
+
+def getAllBuildNumbers(Job job) {
+    def buildNumbers = []
+    (job.getBuilds()).each { build -&gt;
+        buildNumbers.add(build.getDisplayName())
+    }
+    return buildNumbers
+}
+
+def buildJob = Jenkins.instance.getItemByFullName(&apos;CF-Demo/unit-project&apos;);
+return getAllBuildNumbers(buildJob)</scriptText>
+            <usePredefinedVariables>true</usePredefinedVariables>
+            <project class="maven2-moduleset" reference="../../../../../.."/>
+          </choiceListProvider>
+        </jp.ikedam.jenkins.plugins.extensible__choice__parameter.ExtensibleChoiceParameterDefinition>
+      </parameterDefinitions>
+    </hudson.model.ParametersDefinitionProperty>
   </properties>
   <scm class="hudson.plugins.git.GitSCM" plugin="git@2.5.3">
     <configVersion>2</configVersion>
@@ -40,19 +66,25 @@
   <canRoam>true</canRoam>
   <disabled>false</disabled>
   <blockBuildWhenDownstreamBuilding>false</blockBuildWhenDownstreamBuilding>
-  <blockBuildWhenUpstreamBuilding>false</blockBuildWhenUpstreamBuilding>
+  <blockBuildWhenUpstreamBuilding>true</blockBuildWhenUpstreamBuilding>
   <triggers>
-    <hudson.triggers.SCMTrigger>
-      <spec>H/15 * * * *</spec>
-      <ignorePostCommitHooks>false</ignorePostCommitHooks>
-    </hudson.triggers.SCMTrigger>
+    <jenkins.triggers.ReverseBuildTrigger>
+      <spec></spec>
+      <upstreamProjects>unit-project, </upstreamProjects>
+      <threshold>
+        <name>SUCCESS</name>
+        <ordinal>0</ordinal>
+        <color>BLUE</color>
+        <completeBuild>true</completeBuild>
+      </threshold>
+    </jenkins.triggers.ReverseBuildTrigger>
   </triggers>
   <concurrentBuild>true</concurrentBuild>
   <rootModule>
     <groupId>org.bk</groupId>
     <artifactId>sample-spring-cloud-svc-ci</artifactId>
   </rootModule>
-  <goals>clean package</goals>
+  <goals>package -Dmaven.test.skip=true</goals>
   <aggregatorStyleBuild>true</aggregatorStyleBuild>
   <incrementalBuild>false</incrementalBuild>
   <localRepository class="hudson.maven.local_repo.DefaultLocalRepositoryLocator"/>
@@ -89,7 +121,7 @@
         <hudson.plugins.parameterizedtrigger.BuildTriggerConfig>
           <configs>
             <hudson.plugins.parameterizedtrigger.PredefinedBuildParameters>
-              <properties>BUILD_VERSION=$BUILD_VERSION</properties>
+              <properties>BUILD_VERSION=${BUILD_VERSION}</properties>
             </hudson.plugins.parameterizedtrigger.PredefinedBuildParameters>
           </configs>
           <projects>deploy-project-to-dev</projects>
@@ -101,22 +133,9 @@
   </publishers>
   <buildWrappers>
     <se.diabol.jenkins.pipeline.PipelineVersionContributor plugin="delivery-pipeline-plugin@0.9.12">
-      <versionTemplate>1.${BUILDS_ALL_TIME}.r${GIT_COMMIT}</versionTemplate>
+      <versionTemplate>${BUILD_VERSION} </versionTemplate>
       <updateDisplayName>true</updateDisplayName>
     </se.diabol.jenkins.pipeline.PipelineVersionContributor>
-    <org.jvnet.hudson.tools.versionnumber.VersionNumberBuilder plugin="versionnumber@1.7">
-      <versionNumberString>1.${BUILDS_ALL_TIME}.r${GIT_COMMIT}</versionNumberString>
-      <projectStartDate>2016-08-10 00:00:00.0 UTC</projectStartDate>
-      <environmentVariableName>BUILD_VERSION</environmentVariableName>
-      <environmentPrefixVariable></environmentPrefixVariable>
-      <oBuildsToday></oBuildsToday>
-      <oBuildsThisWeek></oBuildsThisWeek>
-      <oBuildsThisMonth></oBuildsThisMonth>
-      <oBuildsThisYear></oBuildsThisYear>
-      <oBuildsAllTime></oBuildsAllTime>
-      <skipFailedBuilds>false</skipFailedBuilds>
-      <useAsBuildDisplayName>true</useAsBuildDisplayName>
-    </org.jvnet.hudson.tools.versionnumber.VersionNumberBuilder>
   </buildWrappers>
   <prebuilders>
     <com.cloudbees.jenkins.GitHubSetCommitStatusBuilder plugin="github@1.20.0">

@@ -81,13 +81,17 @@
     <hudson.plugins.parameterizedtrigger.BuildTrigger plugin="parameterized-trigger@2.32">
       <configs>
         <hudson.plugins.parameterizedtrigger.BuildTriggerConfig>
-          <configs class="empty-list"/>
+          <configs>
+            <hudson.plugins.parameterizedtrigger.CurrentBuildParameters/>
+          </configs>
           <projects>build-project</projects>
           <condition>SUCCESS</condition>
           <triggerWithNoParameters>false</triggerWithNoParameters>
         </hudson.plugins.parameterizedtrigger.BuildTriggerConfig>
         <hudson.plugins.parameterizedtrigger.BuildTriggerConfig>
-          <configs class="empty-list"/>
+          <configs>
+            <hudson.plugins.parameterizedtrigger.CurrentBuildParameters/>
+          </configs>
           <projects>quality-project</projects>
           <condition>SUCCESS</condition>
           <triggerWithNoParameters>false</triggerWithNoParameters>
@@ -95,7 +99,12 @@
       </configs>
     </hudson.plugins.parameterizedtrigger.BuildTrigger>
   </publishers>
-  <buildWrappers/>
+  <buildWrappers>
+    <se.diabol.jenkins.pipeline.PipelineVersionContributor plugin="delivery-pipeline-plugin@0.9.12">
+      <versionTemplate>1.0.${BUILD_NUMBER}.r${GIT_REVISION,length=8}</versionTemplate>
+      <updateDisplayName>true</updateDisplayName>
+    </se.diabol.jenkins.pipeline.PipelineVersionContributor>
+  </buildWrappers>
   <prebuilders>
     <com.cloudbees.jenkins.GitHubSetCommitStatusBuilder plugin="github@1.20.0">
       <statusMessage>
