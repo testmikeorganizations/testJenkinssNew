@@ -1,12 +1,19 @@
 FROM jenkinsci/jenkins:2.7
+MAINTAINER Mark Alston <malston@pivotal.io>
 
 USER root
 
-# install cf cli
-ENV CF_CLI $PWD/
-ENV PATH $CF_CLI:$PATH
-ADD https://cli.run.pivotal.io/stable?release=linux32-binary&version=6.19.0&source=github-rel $CF_CLI/cf.tgz
-RUN tar zxvf $CF_CLI/cf.tgz && cf --version
+RUN curl -L "https://cli.run.pivotal.io/stable?release=linux64-binary" -o cf.tgz \
+    && tar -xvf cf.tgz \
+    && chmod +x cf \
+    && mv cf /usr/bin
+
+RUN curl -L "https://github.com/contraband/autopilot/releases/download/0.0.2/autopilot-linux" -o autopilot \
+    && chmod +x autopilot \
+    && cf install-plugin ./autopilot -f
+
+RUN cf --version
+RUN cf plugins | grep autopilot
 
 WORKDIR /tmp/files
 RUN chown -R jenkins.jenkins .
