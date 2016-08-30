@@ -1,17 +1,21 @@
 FROM jenkinsci/jenkins:latest
-MAINTAINER David Malone <dmalone@pivotal.io>
+MAINTAINER Mark Alston <malston@pivotal.io>
 
+RUN curl -L "https://cli.run.pivotal.io/stable?release=linux64-binary" -o cf.tgz \
+    && tar -xvf cf.tgz \
+    && chmod +x cf \
+    && mv cf /usr/bin \
+    && cf --version
 
-USER root
-ENV CF_CLI $PWD/
-ENV PATH $CF_CLI:$PATH
+RUN curl -L "https://github.com/contraband/autopilot/releases/download/0.0.2/autopilot-linux" -o autopilot \
+    && chmod +x autopilot \
+    && cf install-plugin ./autopilot -f \
+    && cf plugins | grep autopilot
 
-ADD https://cli.run.pivotal.io/stable?release=linux32-binary&version=6.19.0&source=github-rel \
-  $CF_CLI/cf.tgz
-
-RUN tar zxvf $CF_CLI/cf.tgz
-RUN cf --version
-
+RUN curl -L "https://github.com/odlp/antifreeze/releases/download/v0.3.0/antifreeze-darwin" -o antifreeze \
+    && chmod +x antifreeze \
+    && cf install-plugin ./antifreeze -f \
+    && cf plugins | grep antifreeze
 
 USER jenkins
 RUN install-plugins.sh \
@@ -21,7 +25,9 @@ RUN install-plugins.sh \
   timestamper \
   subversion \
   gradle \
+  maven \
   github-organization-folder \
   email-ext \
-  credentials-binding \
-  job-dsl
+  credentials-binding:1.23 \
+  job-dsl \
+  config-file-provider:2.11

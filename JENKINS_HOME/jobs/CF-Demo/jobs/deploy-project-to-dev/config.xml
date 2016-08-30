@@ -1,0 +1,169 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<project>
+  <actions/>
+  <description></description>
+  <keepDependencies>false</keepDependencies>
+  <properties>
+    <jenkins.model.BuildDiscarderProperty>
+      <strategy class="hudson.tasks.LogRotator">
+        <daysToKeep>10</daysToKeep>
+        <numToKeep>5</numToKeep>
+        <artifactDaysToKeep>-1</artifactDaysToKeep>
+        <artifactNumToKeep>-1</artifactNumToKeep>
+      </strategy>
+    </jenkins.model.BuildDiscarderProperty>
+    <se.diabol.jenkins.pipeline.PipelineProperty plugin="delivery-pipeline-plugin@0.9.12">
+      <taskName>Push to Dev</taskName>
+      <stageName>Acceptance</stageName>
+    </se.diabol.jenkins.pipeline.PipelineProperty>
+    <hudson.model.ParametersDefinitionProperty>
+      <parameterDefinitions>
+        <jp.ikedam.jenkins.plugins.extensible__choice__parameter.ExtensibleChoiceParameterDefinition plugin="extensible-choice-parameter@1.3.2">
+          <name>BUILD_VERSION</name>
+          <description>The project build to promote</description>
+          <editable>false</editable>
+          <choiceListProvider class="jp.ikedam.jenkins.plugins.extensible_choice_parameter.SystemGroovyChoiceListProvider">
+            <scriptText>import jenkins.model.*
+import hudson.model.*
+
+def getAllBuildNumbers(Job job) {
+    def buildNumbers = []
+    (job.getBuilds()).each { build -&gt;
+        buildNumbers.add(build.getDisplayName())
+    }
+    return buildNumbers
+}
+
+def buildJob = Jenkins.instance.getItemByFullName(&apos;CF-Demo/build-project&apos;);
+return getAllBuildNumbers(buildJob)</scriptText>
+            <usePredefinedVariables>true</usePredefinedVariables>
+            <project class="project" reference="../../../../../.."/>
+          </choiceListProvider>
+        </jp.ikedam.jenkins.plugins.extensible__choice__parameter.ExtensibleChoiceParameterDefinition>
+        <hudson.model.StringParameterDefinition>
+          <name>APP_NAME</name>
+          <description></description>
+          <defaultValue>sample-spring-cloud-svc-ci</defaultValue>
+        </hudson.model.StringParameterDefinition>
+      </parameterDefinitions>
+    </hudson.model.ParametersDefinitionProperty>
+  </properties>
+  <scm class="hudson.scm.NullSCM"/>
+  <canRoam>true</canRoam>
+  <disabled>false</disabled>
+  <blockBuildWhenDownstreamBuilding>false</blockBuildWhenDownstreamBuilding>
+  <blockBuildWhenUpstreamBuilding>false</blockBuildWhenUpstreamBuilding>
+  <triggers>
+    <jenkins.triggers.ReverseBuildTrigger>
+      <spec></spec>
+      <upstreamProjects>build-project, </upstreamProjects>
+      <threshold>
+        <name>SUCCESS</name>
+        <ordinal>0</ordinal>
+        <color>BLUE</color>
+        <completeBuild>true</completeBuild>
+      </threshold>
+    </jenkins.triggers.ReverseBuildTrigger>
+  </triggers>
+  <concurrentBuild>false</concurrentBuild>
+  <builders>
+    <hudson.tasks.Shell>
+      <command>#!/bin/bash
+
+if [ ! -d ${WORKSPACE}/artifacts ]; then
+	mkdir ${WORKSPACE}/artifacts
+fi
+
+wget http://192.168.99.102:8081/service/local/repositories/releases/content/org/bk/${APP_NAME}/${BUILD_VERSION}/${APP_NAME}-${BUILD_VERSION}.jar
+
+mv ${APP_NAME}-${BUILD_VERSION}.jar ${WORKSPACE}/artifacts/${APP_NAME}-${BUILD_VERSION}.jar
+
+if [ ! -f cf ]; then
+	wget https://cli.run.pivotal.io/stable?release=linux32-binary -O cf-linux-amd64.tgz
+	tar -zxvf cf-linux-amd64.tgz
+fi
+./cf --version
+./cf api --skip-ssl-validation ${CF_API_URL}
+./cf login -u ${CF_USER} -p ${CF_PASSWORD} -o ${CF_ORG} -s ${CF_SPACE}
+
+./cf create-service p-mongodb development cf-demo-mongo-service-${ENVIRONMENT}
+./cf create-service p-rabbitmq standard cf-demo-rabbit-service-${ENVIRONMENT}
+./cf create-service p-mysql 100mb-dev cf-demo-mysql-service-${ENVIRONMENT}
+
+DEPLOYED_VERSION_CMD=$(CF_COLOR=false ./cf apps | grep &apos;sample-spring-cloud-svc-&apos; | cut -d&quot; &quot; -f1)
+DEPLOYED_VERSION=&quot;$DEPLOYED_VERSION_CMD&quot;
+ROUTE_VERSION=$(echo &quot;${BUILD_VERSION}&quot; | cut -d&quot;.&quot; -f1-3 | tr &apos;.&apos; &apos;-&apos;)
+echo &quot;Deployed Version: $DEPLOYED_VERSION&quot;
+echo &quot;Route Version: $ROUTE_VERSION&quot;
+
+./cf push &quot;$APP_NAME-$BUILD_VERSION&quot; -i 1 -m 512M -n &quot;$APP_NAME-$ROUTE_VERSION-${ENVIRONMENT}&quot; -d $CF_APPS_DOMAIN -p artifacts/${APP_NAME}-${BUILD_VERSION}.jar --no-manifest --no-start
+
+./cf bind-service &quot;$APP_NAME-$BUILD_VERSION&quot; cf-demo-mongo-service-${ENVIRONMENT}
+./cf bind-service &quot;$APP_NAME-$BUILD_VERSION&quot; cf-demo-rabbit-service-${ENVIRONMENT}
+./cf bind-service &quot;$APP_NAME-$BUILD_VERSION&quot; cf-demo-mysql-service-${ENVIRONMENT}
+
+./cf start &quot;$APP_NAME-$BUILD_VERSION&quot;
+
+./cf map-route &quot;${APP_NAME}-${BUILD_VERSION}&quot; $CF_APPS_DOMAIN -n ${APP_NAME}-${ENVIRONMENT}
+./cf scale ${APP_NAME}-${BUILD_VERSION} -i 2
+
+if [ ! -z &quot;$DEPLOYED_VERSION&quot; -a &quot;$DEPLOYED_VERSION&quot; != &quot;&quot; -a &quot;$DEPLOYED_VERSION&quot; != &quot;$APP_NAME-$BUILD_VERSION&quot; ]; then
+    echo &quot;Performing zero-downtime cutover to $BUILD_VERSION&quot;
+    while read line
+    do
+        if [ ! -z &quot;$line&quot; -a &quot;$line&quot; != &quot; &quot; -a &quot;$line&quot; != &quot;${APP_NAME}-${BUILD_VERSION}&quot; ]; then
+            echo &quot;Scaling down, unmapping and removing $line&quot;
+            ./cf scale &quot;$line&quot; -i 1
+            ./cf unmap-route &quot;$line&quot; $CF_APPS_DOMAIN -n ${APP_NAME}-${ENVIRONMENT}
+            ./cf delete &quot;$line&quot; -f
+        else
+            echo &quot;Skipping $line&quot;
+        fi
+    done &lt;&lt;&lt; &quot;$DEPLOYED_VERSION&quot;
+fi
+</command>
+    </hudson.tasks.Shell>
+  </builders>
+  <publishers>
+    <hudson.plugins.parameterizedtrigger.BuildTrigger plugin="parameterized-trigger@2.32">
+      <configs>
+        <hudson.plugins.parameterizedtrigger.BuildTriggerConfig>
+          <configs>
+            <hudson.plugins.parameterizedtrigger.PredefinedBuildParameters>
+              <properties>PROMOTED_VERSION=$BUILD_VERSION</properties>
+            </hudson.plugins.parameterizedtrigger.PredefinedBuildParameters>
+          </configs>
+          <projects>acceptance-project-dev, smoke-project-dev, </projects>
+          <condition>SUCCESS</condition>
+          <triggerWithNoParameters>false</triggerWithNoParameters>
+        </hudson.plugins.parameterizedtrigger.BuildTriggerConfig>
+      </configs>
+    </hudson.plugins.parameterizedtrigger.BuildTrigger>
+  </publishers>
+  <buildWrappers>
+    <com.michelin.cio.hudson.plugins.maskpasswords.MaskPasswordsBuildWrapper>
+      <varPasswordPairs>
+        <varPasswordPair var="CF_USER" password="hWBBtXnf1d7u2zMiyQe4b+VS0q4cSRSVyFCD6FqXs8E="/>
+        <varPasswordPair var="CF_PASSWORD" password="F3vG8pd2kJBMdj1KAiGvu5FM+inziY1Dqao06A8eKIY="/>
+        <varPasswordPair var="CF_ORG" password="fj26A8+VElUglk9EQ32zTyyzHvURMQt4FoijNwhGw94="/>
+        <varPasswordPair var="CF_SPACE" password="Wjei8L9Ik6N7FT0lQuxgk63hr0wq2M1He3vmGt7+VFE="/>
+        <varPasswordPair var="CF_API_URL" password="2g7THkHUMwW94lQY1eVC66ZbxVuPTeAtKSZlGz+0mcFV0iroNQFHHFkZvDZhKNrn"/>
+        <varPasswordPair var="CF_APPS_DOMAIN" password="QU4kcDzpAL1j8xXLbjnQMqkccSaupCtdICy+GDDfnxrbJ6VACt9cr92YU0XefQj2"/>
+        <varPasswordPair var="ENVIRONMENT" password="99r6Wx/xRutfCg4Hoi9NuE0xljDM1gRwPA2vIZTQBC8="/>
+      </varPasswordPairs>
+    </com.michelin.cio.hudson.plugins.maskpasswords.MaskPasswordsBuildWrapper>
+    <org.jvnet.hudson.tools.versionnumber.VersionNumberBuilder plugin="versionnumber@1.7">
+      <versionNumberString>${BUILD_VERSION}</versionNumberString>
+      <projectStartDate>1969-12-31 00:00:00.0 UTC</projectStartDate>
+      <environmentVariableName>BUILD_VERSION</environmentVariableName>
+      <environmentPrefixVariable></environmentPrefixVariable>
+      <oBuildsToday></oBuildsToday>
+      <oBuildsThisWeek></oBuildsThisWeek>
+      <oBuildsThisMonth></oBuildsThisMonth>
+      <oBuildsThisYear></oBuildsThisYear>
+      <oBuildsAllTime></oBuildsAllTime>
+      <skipFailedBuilds>false</skipFailedBuilds>
+      <useAsBuildDisplayName>true</useAsBuildDisplayName>
+    </org.jvnet.hudson.tools.versionnumber.VersionNumberBuilder>
+  </buildWrappers>
+</project>

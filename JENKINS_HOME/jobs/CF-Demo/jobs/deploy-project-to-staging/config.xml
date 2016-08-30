@@ -1,0 +1,187 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<project>
+  <actions/>
+  <description></description>
+  <keepDependencies>false</keepDependencies>
+  <properties>
+    <jenkins.model.BuildDiscarderProperty>
+      <strategy class="hudson.tasks.LogRotator">
+        <daysToKeep>10</daysToKeep>
+        <numToKeep>5</numToKeep>
+        <artifactDaysToKeep>-1</artifactDaysToKeep>
+        <artifactNumToKeep>-1</artifactNumToKeep>
+      </strategy>
+    </jenkins.model.BuildDiscarderProperty>
+    <se.diabol.jenkins.pipeline.PipelineProperty plugin="delivery-pipeline-plugin@0.9.12">
+      <taskName>Push to Staging</taskName>
+      <stageName>Deploy</stageName>
+    </se.diabol.jenkins.pipeline.PipelineProperty>
+    <hudson.model.ParametersDefinitionProperty>
+      <parameterDefinitions>
+        <jp.ikedam.jenkins.plugins.extensible__choice__parameter.ExtensibleChoiceParameterDefinition plugin="extensible-choice-parameter@1.3.2">
+          <name>PROMOTED_VERSION</name>
+          <description>The project build to promote</description>
+          <editable>false</editable>
+          <choiceListProvider class="jp.ikedam.jenkins.plugins.extensible_choice_parameter.SystemGroovyChoiceListProvider">
+            <scriptText>import jenkins.model.*
+import hudson.model.*
+
+def getAllBuildNumbers(Job job) {
+    def buildNumbers = []
+    (job.getBuilds()).each { build -&gt;
+        if (build.getResult() == Result.SUCCESS) {
+            buildNumbers.add(build.getDisplayName().trim())
+        }
+    }
+    return buildNumbers.unique().sort().reverse(true)
+}
+
+def buildJob = Jenkins.instance.getItemByFullName(&apos;CF-Demo/build-project&apos;);
+return getAllBuildNumbers(buildJob)</scriptText>
+            <usePredefinedVariables>true</usePredefinedVariables>
+            <project class="project" reference="../../../../../.."/>
+          </choiceListProvider>
+        </jp.ikedam.jenkins.plugins.extensible__choice__parameter.ExtensibleChoiceParameterDefinition>
+        <hudson.model.StringParameterDefinition>
+          <name>APP_NAME</name>
+          <description></description>
+          <defaultValue>sample-spring-cloud-svc-ci</defaultValue>
+        </hudson.model.StringParameterDefinition>
+      </parameterDefinitions>
+    </hudson.model.ParametersDefinitionProperty>
+  </properties>
+  <scm class="hudson.plugins.git.GitSCM" plugin="git@2.5.3">
+    <configVersion>2</configVersion>
+    <userRemoteConfigs>
+      <hudson.plugins.git.UserRemoteConfig>
+        <url>https://github.com/pivotalservices/sample-spring-cloud-svc-ci.git</url>
+      </hudson.plugins.git.UserRemoteConfig>
+    </userRemoteConfigs>
+    <branches>
+      <hudson.plugins.git.BranchSpec>
+        <name>*/master</name>
+      </hudson.plugins.git.BranchSpec>
+    </branches>
+    <doGenerateSubmoduleConfigurations>false</doGenerateSubmoduleConfigurations>
+    <submoduleCfg class="list"/>
+    <extensions/>
+  </scm>
+  <canRoam>true</canRoam>
+  <disabled>false</disabled>
+  <blockBuildWhenDownstreamBuilding>false</blockBuildWhenDownstreamBuilding>
+  <blockBuildWhenUpstreamBuilding>false</blockBuildWhenUpstreamBuilding>
+  <triggers>
+    <jenkins.triggers.ReverseBuildTrigger>
+      <spec></spec>
+      <upstreamProjects>acceptance-project-dev, </upstreamProjects>
+      <threshold>
+        <name>SUCCESS</name>
+        <ordinal>0</ordinal>
+        <color>BLUE</color>
+        <completeBuild>true</completeBuild>
+      </threshold>
+    </jenkins.triggers.ReverseBuildTrigger>
+  </triggers>
+  <concurrentBuild>false</concurrentBuild>
+  <builders>
+    <hudson.tasks.Shell>
+      <command>#!/bin/bash
+
+set -xe
+
+BUILD_VERSION=$PROMOTED_VERSION
+
+if [ ! -d ${WORKSPACE}/artifacts ]; then
+    mkdir ${WORKSPACE}/artifacts
+fi
+
+echo &quot;Build Version: ${PROMOTED_VERSION}&quot;
+wget http://192.168.99.102:8081/service/local/repositories/releases/content/org/bk/${APP_NAME}/${BUILD_VERSION}/${APP_NAME}-${BUILD_VERSION}.jar
+
+mv ${APP_NAME}-${BUILD_VERSION}.jar ${WORKSPACE}/artifacts/${APP_NAME}-${BUILD_VERSION}.jar
+
+if [ ! -f cf ]; then
+    wget https://cli.run.pivotal.io/stable?release=linux32-binary -O cf-linux-amd64.tgz
+    tar -zxvf cf-linux-amd64.tgz
+fi
+./cf --version
+
+if [ ! -f autopilot ]; then
+    wget https://github.com/contraband/autopilot/releases/download/0.0.2/autopilot-linux -O autopilot
+    chmod +x autopilot
+    ./cf install-plugin ./autopilot -f
+fi
+
+autopilot_installed=$(cf plugins | grep autopilot)
+if [[ $autopilot_installed != autopilot* ]]; then
+    echo &quot;Autopilot did not install&quot;; exit 1;
+fi
+
+if [ ! -f antifreeze ]; then
+    wget https://github.com/odlp/antifreeze/releases/download/v0.3.0/antifreeze-linux -O antifreeze
+    chmod +x antifreeze
+    ./cf install-plugin ./antifreeze -f
+fi
+
+antifreeze_installed=$(cf plugins | grep antifreeze)
+if [[ $antifreeze_installed != antifreeze* ]]; then
+    echo &quot;Antifreeze did not install&quot;; exit 1;
+fi
+
+if [ $CF_SPACE = &apos;production&apos; ]; then
+  MANIFEST=&quot;manifest-prod.yml&quot;
+elif [ $CF_SPACE = &apos;development&apos; ]; then
+  MANIFEST=&quot;manifest-dev.yml&quot;
+elif [ $CF_SPACE = &apos;staging&apos; ]; then
+  MANIFEST=&quot;manifest-stg.yml&quot;
+else
+  echo &quot;Unknown space: $CF_SPACE&quot;
+  exit 1
+fi
+
+./cf api --skip-ssl-validation ${CF_API_URL}
+./cf login -u ${CF_USER} -p ${CF_PASSWORD} -o ${CF_ORG} -s ${CF_SPACE}
+
+
+#./cf check-manifest $APP_NAME -f ${WORKSPACE}/$MANIFEST
+check_manifest=$(./cf check-manifest $APP_NAME -f ${WORKSPACE}/$MANIFEST | tail -n1)
+if [[ $check_manifest == error* ]]; then
+	echo &quot;This is a maiden deploy&quot;
+  	cf push $APP_NAME -f ${WORKSPACE}/$MANIFEST -p ${WORKSPACE}/artifacts/${APP_NAME}-${BUILD_VERSION}.jar -n ${APP_NAME}-${ENVIRONMENT}
+else
+  echo &quot;Performing a zero downtime push&quot;
+  cf zero-downtime-push $APP_NAME -f ${WORKSPACE}/$MANIFEST -p ${WORKSPACE}/artifacts/${APP_NAME}-${BUILD_VERSION}.jar -n ${APP_NAME}-${ENVIRONMENT}
+fi
+
+exit 0
+</command>
+    </hudson.tasks.Shell>
+  </builders>
+  <publishers/>
+  <buildWrappers>
+    <com.michelin.cio.hudson.plugins.maskpasswords.MaskPasswordsBuildWrapper>
+      <varPasswordPairs>
+        <varPasswordPair var="CF_USER" password="hWBBtXnf1d7u2zMiyQe4b+VS0q4cSRSVyFCD6FqXs8E="/>
+        <varPasswordPair var="CF_PASSWORD" password="F3vG8pd2kJBMdj1KAiGvu5FM+inziY1Dqao06A8eKIY="/>
+        <varPasswordPair var="CF_ORG" password="fj26A8+VElUglk9EQ32zTyyzHvURMQt4FoijNwhGw94="/>
+        <varPasswordPair var="CF_SPACE" password="XgFbF8JG5xBHKNfOHdO2cPoYdypMytSK3rYZ3IRyPSk="/>
+        <varPasswordPair var="CF_API_URL" password="2YMqpvK41t0M+X+Td+El2fnkJJ4BhOyBvhfCj+OKdQ3eK2Srf37wYJZ/FnCW6jwU"/>
+        <varPasswordPair var="CF_APPS_DOMAIN" password="QU4kcDzpAL1j8xXLbjnQMqkccSaupCtdICy+GDDfnxrbJ6VACt9cr92YU0XefQj2"/>
+        <varPasswordPair var="ENVIRONMENT" password="XgFbF8JG5xBHKNfOHdO2cPoYdypMytSK3rYZ3IRyPSk="/>
+      </varPasswordPairs>
+    </com.michelin.cio.hudson.plugins.maskpasswords.MaskPasswordsBuildWrapper>
+    <org.jvnet.hudson.tools.versionnumber.VersionNumberBuilder plugin="versionnumber@1.7">
+      <versionNumberString>${PROMOTED_VERSION}</versionNumberString>
+      <projectStartDate>1969-12-31 00:00:00.0 UTC</projectStartDate>
+      <environmentVariableName>PROMOTED_VERSION</environmentVariableName>
+      <environmentPrefixVariable></environmentPrefixVariable>
+      <oBuildsToday></oBuildsToday>
+      <oBuildsThisWeek></oBuildsThisWeek>
+      <oBuildsThisMonth></oBuildsThisMonth>
+      <oBuildsThisYear></oBuildsThisYear>
+      <oBuildsAllTime></oBuildsAllTime>
+      <skipFailedBuilds>false</skipFailedBuilds>
+      <useAsBuildDisplayName>true</useAsBuildDisplayName>
+    </org.jvnet.hudson.tools.versionnumber.VersionNumberBuilder>
+  </buildWrappers>
+</project>
