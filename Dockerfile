@@ -32,4 +32,5 @@ RUN install-plugins.sh \
   email-ext \
   credentials-binding \
   job-dsl \
+  delivery-pipeline-plugin \
   config-file-provider

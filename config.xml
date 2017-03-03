@@ -34,7 +34,7 @@
       <configVersion>2</configVersion>
       <userRemoteConfigs>
         <hudson.plugins.git.UserRemoteConfig>
-          <url>https://github.com/pivotalservices/sample-spring-cloud-svc-ci</url>
+          <url>https://github.com/malston/sample-spring-cloud-svc</url>
         </hudson.plugins.git.UserRemoteConfig>
       </userRemoteConfigs>
       <branches>

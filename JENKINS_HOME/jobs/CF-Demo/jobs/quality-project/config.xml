@@ -13,7 +13,7 @@
       </strategy>
     </jenkins.model.BuildDiscarderProperty>
     <com.coravy.hudson.plugins.github.GithubProjectProperty plugin="github@1.20.0">
-      <projectUrl>https://github.com/pivotalservices/sample-spring-cloud-svc-ci/</projectUrl>
+      <projectUrl>https://github.com/malston/sample-spring-cloud-svc/</projectUrl>
       <displayName></displayName>
     </com.coravy.hudson.plugins.github.GithubProjectProperty>
     <se.diabol.jenkins.pipeline.PipelineProperty plugin="delivery-pipeline-plugin@0.9.12">
@@ -25,7 +25,7 @@
     <configVersion>2</configVersion>
     <userRemoteConfigs>
       <hudson.plugins.git.UserRemoteConfig>
-        <url>https://github.com/pivotalservices/sample-spring-cloud-svc-ci.git</url>
+        <url>https://github.com/malston/sample-spring-cloud-svc.git</url>
       </hudson.plugins.git.UserRemoteConfig>
     </userRemoteConfigs>
     <branches>
