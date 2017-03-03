@@ -32,4 +32,4 @@ RUN install-plugins.sh \
   email-ext \
   credentials-binding \
   job-dsl \
-  config-file-provider:2.11
+  config-file-provider
