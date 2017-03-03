@@ -1,6 +1,8 @@
 FROM jenkinsci/jenkins:latest
 MAINTAINER Mark Alston <malston@pivotal.io>
 
+USER root
+
 RUN curl -L "https://cli.run.pivotal.io/stable?release=linux64-binary" -o cf.tgz \
     && tar -xvf cf.tgz \
     && chmod +x cf \
@@ -12,7 +14,7 @@ RUN curl -L "https://github.com/contraband/autopilot/releases/download/0.0.2/aut
     && cf install-plugin ./autopilot -f \
     && cf plugins | grep autopilot
 
-RUN curl -L "https://github.com/odlp/antifreeze/releases/download/v0.3.0/antifreeze-darwin" -o antifreeze \
+RUN curl -L "https://github.com/odlp/antifreeze/releases/download/v0.3.0/antifreeze-linux" -o antifreeze \
     && chmod +x antifreeze \
     && cf install-plugin ./antifreeze -f \
     && cf plugins | grep antifreeze
@@ -28,6 +30,6 @@ RUN install-plugins.sh \
   maven \
   github-organization-folder \
   email-ext \
-  credentials-binding:1.23 \
+  credentials-binding \
   job-dsl \
   config-file-provider:2.11
